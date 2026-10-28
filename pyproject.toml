@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "obelisk-ffb"
+dynamic = ["version"]
+description = "Linux settings tool for the VNM Xtreme 32 Nm direct-drive wheelbase (GTK4 + libadwaita)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "VSimCraft" }]
+keywords = ["vnm", "direct-drive", "wheelbase", "sim-racing", "force-feedback", "gtk4", "libadwaita"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Hardware",
+]
+# PyGObject, GTK4 and libadwaita come from the distribution; listing PyGObject here would make pip compile it.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/VSimCraft/obelisk"
+Issues = "https://github.com/VSimCraft/obelisk/issues"
+Changelog = "https://github.com/VSimCraft/obelisk/blob/main/CHANGELOG.md"
+
+[project.scripts]
+obelisk = "obelisk.cli:main"
+
+[tool.setuptools]
+packages = ["obelisk"]
+
+[tool.setuptools.dynamic]
+version = { attr = "obelisk.__version__" }
+
+[tool.setuptools.package-data]
+obelisk = ["wheels.ini", "data/*"]

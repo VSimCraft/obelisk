@@ -64,7 +64,7 @@ Unknown whether the device needs 1-2 or the 0x1a stream before answering `0a` pa
   SimCenter re-applying its stored profile when the wheelbase reconnects (vnm.pcapng t=5.5 shows a three-page write + the page-7 read at
   startup). So Obelisk stores the values itself (profiles in `~/.config/obelisk/profiles/<name>.json`, active profile name in
   `~/.config/obelisk/active.json`) and re-applies them on every connect
-  (`Device.apply_values`, or `python -m obelisk --apply`). The commit/ack packets are intentionally NOT implemented.
+  (`Device.apply_values`, or `obelisk --apply`). The commit/ack packets are intentionally NOT implemented.
 
 ## Windows session 2026-10-24 (capture/05..10, notes in capture/NOTES.md; key claims re-verified with tools/usbmon_parse.py)
 - **Max Torque Mode is a wheelbase command, not UI-only:** `14 0d 00 ec 00 00 00 00 <m> 00 …`, m = 1 (ON) / 0 (OFF), sent the moment the

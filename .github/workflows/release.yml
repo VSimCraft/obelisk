@@ -1,0 +1,101 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+    branches: [packaging-ci] # dry run: build and test everything, publish nothing
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tag must match package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version=$(python -c "import re,pathlib; print(re.search(r'__version__ = \"(.+?)\"', pathlib.Path('obelisk/__init__.py').read_text()).group(1))")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != version $version"; exit 1; }
+      - name: Tests (GTK smoke test skips without GTK)
+        run: python -m unittest discover -s tests
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  packages:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Build .deb and .rpm
+        run: |
+          curl -fsSL https://github.com/goreleaser/nfpm/releases/download/v2.48.0/nfpm_2.48.0_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin nfpm
+          packaging/build.sh
+      - name: Install the .deb (Debian family)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ./dist/obelisk_*_all.deb
+          obelisk --version
+          test -f /usr/lib/udev/rules.d/70-vnm-direct-drive.rules
+      - name: Install the .rpm (Fedora)
+        run: |
+          docker run --rm -v "$PWD/dist:/dist:ro" fedora sh -c \
+            'dnf install -y /dist/obelisk-*.noarch.rpm && obelisk --version && test -f /usr/lib/udev/rules.d/70-vnm-direct-drive.rules'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            dist/*.deb
+            dist/*.rpm
+
+  publish-pypi:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write # PyPI trusted publishing, no API token stored
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: [build, packages]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: dist/
+      - name: Stamp PKGBUILD with this release
+        run: |
+          sum=$(curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_REF_NAME.tar.gz" | sha256sum | cut -d' ' -f1)
+          sed -e "s/^pkgver=.*/pkgver=${GITHUB_REF_NAME#v}/" -e "s/^sha256sums=.*/sha256sums=('$sum')/" \
+            packaging/arch/PKGBUILD > dist/PKGBUILD
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes

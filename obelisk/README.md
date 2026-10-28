@@ -9,12 +9,12 @@ Settings tool for the VNM direct-drive wheelbase, talking to its vendor HID chan
 ```
 settings (registry)  <-  protocol (pure bytes)  <-  device (locked I/O)  ->  hidraw (fd)
                                                          ^
-profiles (JSON on disk)  ---------------------------- gui / widgets / __main__
+profiles (JSON on disk)  ---------------------------- gui / widgets / cli
 ```
 
 - `settings` + `protocol` do no I/O, so the wire format is unit-testable against captured bytes.
 - GUI actions run on one `Worker` thread; results return to the GTK thread via `GLib.idle_add`. The GUI thread never blocks on the device.
-- `__main__ --apply` imports GTK lazily so the active profile can be applied headless (login scripts, no display).
+- `cli --apply` imports GTK lazily so the active profile can be applied headless (login scripts, no display).
 - Settings live in numbered pages (3, 5, 8). A page is read, patched and written back whole.
 
 ## Design Decisions

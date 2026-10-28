@@ -3,4 +3,7 @@ __pycache__/
 logs/
 capture/
 graphify-out/
-.claude/
+.claude/dist/
+build/
+*.egg-info/
+dist/
