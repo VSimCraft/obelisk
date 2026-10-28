@@ -1,0 +1,27 @@
+# Maintainer: VSimCraft
+# pkgver and sha256sums are stamped by the release workflow, which attaches the result to the GitHub Release.
+pkgname=obelisk
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Settings tool for the VNM Xtreme 32 Nm direct-drive wheelbase'
+arch=(any)
+url='https://github.com/VSimCraft/obelisk'
+license=(GPL-3.0-or-later)
+depends=(python python-gobject gtk4 libadwaita)
+makedepends=(python-build python-installer python-setuptools)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha256sums=(SKIP)
+
+build() {
+  cd "$pkgname-$pkgver"
+  python -m build --wheel --no-isolation
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm644 obelisk/data/70-vnm-direct-drive.rules -t "$pkgdir/usr/lib/udev/rules.d/"
+  sed 's|^Exec=.*|Exec=obelisk|' obelisk/data/io.github.vsimcraft.obelisk.desktop |
+    install -Dm644 /dev/stdin "$pkgdir/usr/share/applications/io.github.vsimcraft.obelisk.desktop"
+  install -Dm644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
+}

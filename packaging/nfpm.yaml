@@ -1,0 +1,46 @@
+# Builds the .deb and .rpm (see build.sh). VERSION comes from the environment.
+name: obelisk
+arch: all
+platform: linux
+version: ${VERSION}
+section: utils
+priority: optional
+maintainer: VSimCraft <vsimcraft@users.noreply.github.com>
+description: |
+  Settings tool for the VNM Xtreme 32 Nm direct-drive wheelbase (GTK4 + libadwaita).
+  Installs the udev rule that grants the logged-in user access to the wheelbase.
+homepage: https://github.com/VSimCraft/obelisk
+license: GPL-3.0-or-later
+
+contents:
+  - src: build/pkgroot/usr/share/obelisk
+    dst: /usr/share/obelisk
+    type: tree
+  - src: packaging/launcher
+    dst: /usr/bin/obelisk
+    file_info:
+      mode: 0755
+  - src: obelisk/data/70-vnm-direct-drive.rules
+    dst: /usr/lib/udev/rules.d/70-vnm-direct-drive.rules
+  - src: build/pkgroot/io.github.vsimcraft.obelisk.desktop
+    dst: /usr/share/applications/io.github.vsimcraft.obelisk.desktop
+  - src: LICENSE
+    dst: /usr/share/doc/obelisk/LICENSE
+
+scripts:
+  postinstall: packaging/udev-reload.sh
+  postremove: packaging/udev-reload.sh
+
+overrides:
+  deb:
+    depends:
+      - python3
+      - python3-gi
+      - gir1.2-gtk-4.0
+      - gir1.2-adw-1
+  rpm:
+    depends:
+      - python3
+      - python3-gobject
+      - gtk4
+      - libadwaita

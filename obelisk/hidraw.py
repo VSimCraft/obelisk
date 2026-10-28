@@ -9,7 +9,7 @@ from .errors import VnmError
 USB_ID = "0483:a3d5"
 HID_ID = "HID_ID=0003:%08X:%08X" % tuple(int(p, 16) for p in USB_ID.split(":"))
 REPORT_SIZE = 64
-HINT = "run packaging/install-udev.sh"
+HINT = "install the udev rule: obelisk --print-udev-rule (see the README)"
 
 
 class DeviceError(VnmError):

@@ -2,8 +2,7 @@
 Type=Application
 Name=Obelisk
 Comment=Settings tool for the VNM Xtreme 32Nm wheelbase
-Exec=python -m obelisk
-Path=@PROJECT_DIR@
+Exec=@EXEC@
 Icon=input-gaming
 Terminal=false
 Categories=Settings;HardwareSettings;GTK;

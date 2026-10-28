@@ -8,6 +8,10 @@ Linux settings tool (`obelisk`, GTK4 + libadwaita) for the VNM Xtreme 32 Nm dire
 | ------------ | ------------------------------------------------------------ | ---------------------------------------------------- |
 | `README.md`  | User guide: setup, controls, profiles, known jstest deadzone | Installing, using, or documenting user-facing change |
 | `.gitignore` | Ignores caches, local captures/logs, graphify and agent dirs | Adding files that must not be committed              |
+| `LICENSE`    | Project license text                                         | Checking licensing terms before redistributing code  |
+| `pyproject.toml` | Package metadata (PyPI name `obelisk-ffb`), entry point, package data | Changing version, dependencies, or what ships in the wheel |
+| `CHANGELOG.md` | Release notes per version                                  | Preparing a release                                  |
+| `.github/workflows/release.yml` | Tag-triggered test, build, PyPI publish, GitHub Release | Changing the release process                  |
 
 ## Subdirectories
 
@@ -17,11 +21,12 @@ Linux settings tool (`obelisk`, GTK4 + libadwaita) for the VNM Xtreme 32 Nm dire
 | `tests/`     | Unit tests with captured bytes, plus a GTK smoke test         | Adding or fixing tests, verifying a change                      |
 | `tools/`     | USB capture parser and live axis monitor (dev only)           | Decoding new protocol behavior, checking axis output            |
 | `docs/`      | Wire protocol decoded from USB captures                       | Understanding report layout, adding a setting                   |
-| `packaging/` | udev rule, install script, desktop entry                      | Fixing hidraw permissions, changing installation                |
+| `packaging/` | nfpm config and launcher for the .deb/.rpm, Arch PKGBUILD | Changing how system packages are built or what they install |
+| `obelisk/data/` | udev rule and desktop entry template, shipped as package data | Fixing hidraw permissions, changing the menu entry         |
 
 ## Build
 
-No build step (pure Python 3, PyGObject with GTK4 and libadwaita).
+`python -m build` (setuptools; wheel and sdist in `dist/`). Runtime needs system PyGObject, GTK4 and libadwaita; they are deliberately not declared as dependencies.
 
 ## Test
 
@@ -29,7 +34,7 @@ No build step (pure Python 3, PyGObject with GTK4 and libadwaita).
 
 ## Development
 
-Run the app: `python -m obelisk`. Apply the active profile without a window: `python -m obelisk --apply`. One-time hidraw access setup: `sh packaging/install-udev.sh`.
+Run the app: `python -m obelisk`. Apply the active profile without a window: `obelisk --apply`. udev rule: `obelisk --print-udev-rule | sudo tee /etc/udev/rules.d/70-vnm-direct-drive.rules`. Menu entry: `obelisk --install-desktop`.
 
 ## graphify
 
