@@ -3,7 +3,7 @@ name: release
 on:
   push:
     tags: ["v*"]
-    branches: [packaging-ci] # dry run: build and test everything, publish nothing
+    branches: [main]
   workflow_dispatch:
 
 jobs:
